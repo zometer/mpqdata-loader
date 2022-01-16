@@ -1,4 +1,4 @@
-package com.mpqdata.app.data.mpqdataloader.spring.config;
+package com.mpqdata.app.data.mpqdataloader.config;
 
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
