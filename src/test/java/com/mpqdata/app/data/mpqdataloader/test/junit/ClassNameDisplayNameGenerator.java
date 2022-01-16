@@ -1,6 +1,7 @@
 package com.mpqdata.app.data.mpqdataloader.test.junit;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class ClassNameDisplayNameGenerator extends DisplayNameGenerator.Standard
 			return classAsMethodName + "()"; 
 		}
 				
-		List<String> elemList = Arrays.asList(elems); 
+		List<String> elemList = new ArrayList<>(Arrays.asList(elems)); 
 		String args = elemList.remove( elemList.size()  - 1 );
 		
 		
