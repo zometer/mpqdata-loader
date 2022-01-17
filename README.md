@@ -43,7 +43,7 @@ done executing.
 
 ### Databases
 
-1. APPSEC - Database that contains role mapping, "secure objects" (dynamic roles), and external account credentials.
+1. MPQDATA - Postgres database containing baseline MPQ character data. 
 
 ### Environment Variables
 
