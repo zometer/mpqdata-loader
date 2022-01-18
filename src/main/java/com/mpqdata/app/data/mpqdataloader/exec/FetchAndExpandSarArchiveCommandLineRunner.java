@@ -58,11 +58,7 @@ public class FetchAndExpandSarArchiveCommandLineRunner implements CommandLineRun
 
 		String path = downloadDir + "/" + configSarUrl.replaceAll("^.*/", "");
 		File outputFile = new File(path);
-		// sarArchiveDownloader.downloadFile(configSarUrl, outputFile);
-
-		// TODO: REMOVE ME - using a static archive for comparison with original process
-		outputFile = new File("/Users/spears/mpq-net/IOS_Config.sar");
-		// END REMOVE ME
+		sarArchiveDownloader.downloadFile(configSarUrl, outputFile);
 
 		RandomAccessFile archive = new RandomAccessFile(outputFile, "r");
 		SarArchiveMetadata metadata = sarArchiveReader.extractMetaData(archive);
@@ -77,7 +73,7 @@ public class FetchAndExpandSarArchiveCommandLineRunner implements CommandLineRun
 
 		archive.close();
 
-		logger.info("Process complete");
+		logger.info("SAR Archive Fetch and Expand Process complete");
 	}
 
 
