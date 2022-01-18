@@ -22,4 +22,5 @@ public class SarArchiveMetadata {
 	private byte platform;
 
 	private String encryptionKey;
+	private byte[] zstdDictionaryBytes;
 }
