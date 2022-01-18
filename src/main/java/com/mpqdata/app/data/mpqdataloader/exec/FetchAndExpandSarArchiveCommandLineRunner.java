@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.mpqdata.app.data.mpqdataloader.archive.ArchiveTableEntry;
@@ -20,8 +21,9 @@ import com.mpqdata.app.data.mpqdataloader.model.service.SarUrlLookupService;
 
 import lombok.Setter;
 
+@Order(0)
 @Component
-public class MpqdataLoaderCommandLineRunner implements CommandLineRunner {
+public class FetchAndExpandSarArchiveCommandLineRunner implements CommandLineRunner {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
