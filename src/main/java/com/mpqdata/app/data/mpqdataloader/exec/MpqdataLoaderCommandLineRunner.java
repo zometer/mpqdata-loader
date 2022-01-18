@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.mpqdata.app.data.mpqdataloader.archive.ArchiveTableEntry;
 import com.mpqdata.app.data.mpqdataloader.archive.SarArchiveDownloader;
+import com.mpqdata.app.data.mpqdataloader.archive.SarArchiveExtractor;
 import com.mpqdata.app.data.mpqdataloader.archive.SarArchiveMetadata;
 import com.mpqdata.app.data.mpqdataloader.archive.SarArchiveReader;
 import com.mpqdata.app.data.mpqdataloader.model.service.SarUrlLookupService;
@@ -39,6 +40,10 @@ public class MpqdataLoaderCommandLineRunner implements CommandLineRunner {
 	@Setter
 	private SarArchiveReader sarArchiveReader;
 
+	@Autowired
+	@Setter
+	private SarArchiveExtractor sarArchiveExtractor;
+
 	@Override
 	public void run(String... args) throws Exception {
 		logger.info("Process start");
@@ -60,8 +65,10 @@ public class MpqdataLoaderCommandLineRunner implements CommandLineRunner {
 		logger.info("metadata: " + metadata);
 
 		List<ArchiveTableEntry> tableEntries = sarArchiveReader.extractArchiveTableEntries(archive, metadata);
+		File targetDir = new File(downloadDir + "/expanded");
 		tableEntries.forEach(entry -> {
 			logger.info("Entry: " + entry.getFileName() + " - " + entry.getCompressedSize() + " - " + entry.getSize() );
+			sarArchiveExtractor.expandFileFromArchive(archive, metadata, entry, targetDir);
 		});
 
 		archive.close();
