@@ -25,6 +25,8 @@ import lombok.Setter;
 @Component
 public class FetchAndExpandSarArchiveCommandLineRunner implements CommandLineRunner {
 
+	public static final String EXPANDED_ARCHIVE_SUBDIR = "/expanded";
+
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Value("${mpq.config.download-dir}")
@@ -67,7 +69,7 @@ public class FetchAndExpandSarArchiveCommandLineRunner implements CommandLineRun
 		logger.info("metadata: " + metadata);
 
 		List<ArchiveTableEntry> tableEntries = sarArchiveReader.extractArchiveTableEntries(archive, metadata);
-		File targetDir = new File(downloadDir + "/expanded");
+		File targetDir = new File(downloadDir + EXPANDED_ARCHIVE_SUBDIR);
 		tableEntries.forEach(entry -> {
 			logger.info("Entry: " + entry.getFileName() + " - " + entry.getCompressedSize() + " - " + entry.getSize() );
 			sarArchiveExtractor.expandFileFromArchive(archive, metadata, entry, targetDir);
