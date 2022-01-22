@@ -9,12 +9,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.mpqdata.app.data.mpqdataloader.model.service.MpqCharcterFileSystemService;
 
 @Order(1)
+@Profile("load-database")
 @Component
 public class LoadDatabaseCommandLineRunner implements CommandLineRunner {
 
@@ -32,9 +34,7 @@ public class LoadDatabaseCommandLineRunner implements CommandLineRunner {
 
 		File dataDir = new File(downloadDir + "/" + EXPANDED_ARCHIVE_SUBDIR);
 		File characterDir = new File(dataDir, "Characters");
-		// Stream.of(dataDir.listFiles()).filter(f -> ! f.getName().contains("_")).forEach(System.out::println);
 		mpqCharcterFileSystemService.loadCharacterConfigs(characterDir);
-
 
 		logger.info("Database Load Process complete");
 	}
