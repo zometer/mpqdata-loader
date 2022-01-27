@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings
+	version="2.0"
+	xmlns="http://java.sun.com/xml/ns/persistence/orm"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm
+	http://java.sun.com/xml/ns/persistence/orm_2_0.xsd "
+>
+
+	<named-native-query name="LocaleText.fetchAllTextKeys" >
+		<query>
+			select distinct(name_key)
+			from mpq_data.mpq_character
+			where 1=1
+			union
+			select distinct(subtitle_key)
+			from mpq_data.mpq_character
+			where 1=1
+			union
+			select distinct(character_bio_key)
+			from mpq_data.mpq_character
+			where 1=1
+			union
+			select distinct(name_key)
+			from mpq_data.ability
+			where 1=1
+			union
+			select distinct(description_key)
+			from mpq_data.ability
+			where 1=1
+		</query>
+	</named-native-query>
+
+</entity-mappings>
