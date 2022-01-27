@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.mpqdata.app.data.mpqdataloader.archive.ArchiveTableEntry;
@@ -20,8 +22,12 @@ import com.mpqdata.app.data.mpqdataloader.model.service.SarUrlLookupService;
 
 import lombok.Setter;
 
+@Order(0)
+@Profile("download-archive")
 @Component
-public class MpqdataLoaderCommandLineRunner implements CommandLineRunner {
+public class FetchAndExpandSarArchiveCommandLineRunner implements CommandLineRunner {
+
+	public static final String EXPANDED_ARCHIVE_SUBDIR = "/expanded";
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -54,18 +60,14 @@ public class MpqdataLoaderCommandLineRunner implements CommandLineRunner {
 
 		String path = downloadDir + "/" + configSarUrl.replaceAll("^.*/", "");
 		File outputFile = new File(path);
-		// sarArchiveDownloader.downloadFile(configSarUrl, outputFile);
-
-		// TODO: REMOVE ME - using a static archive for comparison with original process
-		outputFile = new File("/Users/spears/mpq-net/IOS_Config.sar");
-		// END REMOVE ME
+		sarArchiveDownloader.downloadFile(configSarUrl, outputFile);
 
 		RandomAccessFile archive = new RandomAccessFile(outputFile, "r");
 		SarArchiveMetadata metadata = sarArchiveReader.extractMetaData(archive);
 		logger.info("metadata: " + metadata);
 
 		List<ArchiveTableEntry> tableEntries = sarArchiveReader.extractArchiveTableEntries(archive, metadata);
-		File targetDir = new File(downloadDir + "/expanded");
+		File targetDir = new File(downloadDir + EXPANDED_ARCHIVE_SUBDIR);
 		tableEntries.forEach(entry -> {
 			logger.info("Entry: " + entry.getFileName() + " - " + entry.getCompressedSize() + " - " + entry.getSize() );
 			sarArchiveExtractor.expandFileFromArchive(archive, metadata, entry, targetDir);
@@ -73,7 +75,7 @@ public class MpqdataLoaderCommandLineRunner implements CommandLineRunner {
 
 		archive.close();
 
-		logger.info("Process complete");
+		logger.info("SAR Archive Fetch and Expand Process complete");
 	}
 
 
