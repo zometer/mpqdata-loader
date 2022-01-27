@@ -13,7 +13,10 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import com.mpqdata.app.data.mpqdataloader.model.service.LocaleTextService;
 import com.mpqdata.app.data.mpqdataloader.model.service.MpqCharcterFileSystemService;
+
+import lombok.Setter;
 
 @Order(1)
 @Profile("load-database")
@@ -26,7 +29,12 @@ public class LoadDatabaseCommandLineRunner implements CommandLineRunner {
 	private String downloadDir;
 
 	@Autowired
+	@Setter
 	private MpqCharcterFileSystemService mpqCharcterFileSystemService;
+
+	@Autowired
+	@Setter
+	private LocaleTextService localeTextService;
 
 	@Override
 	public void run(String... args) throws Exception {
@@ -34,7 +42,10 @@ public class LoadDatabaseCommandLineRunner implements CommandLineRunner {
 
 		File dataDir = new File(downloadDir + "/" + EXPANDED_ARCHIVE_SUBDIR);
 		File characterDir = new File(dataDir, "Characters");
+		File localeDir = new File(dataDir, "Loc");
 		mpqCharcterFileSystemService.loadCharacterConfigs(characterDir);
+
+		localeTextService.loadLocaleText(localeDir);
 
 		logger.info("Database Load Process complete");
 	}
