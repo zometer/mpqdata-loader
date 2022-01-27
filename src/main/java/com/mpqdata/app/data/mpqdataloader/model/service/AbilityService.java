@@ -2,6 +2,7 @@ package com.mpqdata.app.data.mpqdataloader.model.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.mpqdata.app.data.mpqdataloader.MpqDataLoaderException;
+import com.mpqdata.app.data.mpqdataloader.model.Overrides;
 import com.mpqdata.app.data.mpqdataloader.model.domain.Ability;
 import com.mpqdata.app.data.mpqdataloader.model.repository.AbilityRepository;
 import com.mpqdata.app.data.mpqdataloader.util.JsonPathUtils;
@@ -21,6 +23,9 @@ import lombok.Setter;
 public class AbilityService {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
+
+	@Autowired
+	private Overrides overrides;
 
 	@Autowired
 	@Setter
@@ -35,15 +40,21 @@ public class AbilityService {
 			DocumentContext doc = JsonPath.parse(file);
 			String charId = JsonPathUtils.extractFirstKey(doc);
 			int numAbilities = doc.read("$." + charId + ".Abilities.length()", Integer.class);
+			Map<String, String> abilityDescOverrides = overrides.getAbilityDescOverrides();
 
 			for (int i=0; i < numAbilities ; i++) {
 				Ability ability = new Ability();
 				String color = fixColor( doc.read("$." + charId + ".Abilities[" + i + "].Color", String.class) );
+				String abilityId = doc.read("$." + charId + ".Abilities[" + i + "].Type", String.class);
+
 				ability.setMpqCharacterId(charId);
-				ability.setAbilityId( doc.read("$." + charId + ".Abilities[" + i + "].Type", String.class) );
+				ability.setAbilityId( abilityId );
 				ability.setColor( color );
 				ability.setCost(doc.read("$." + charId + ".Abilities[" + i + "].ChargeCost", Integer.class) );
-				ability.setDescriptionKey( doc.read("$." + charId + ".Abilities[" + i + "].Desc", String.class) );
+
+
+				String descKey = doc.read("$." + charId + ".Abilities[" + i + "].Desc", String.class);
+				ability.setDescriptionKey( overrides.replaceWithOverride(descKey, abilityDescOverrides) );
 				ability.setNameKey( doc.read("$." + charId + ".Abilities[" + i + "].Name", String.class) );
 				ability.setOrdinalPosition(i);
 
