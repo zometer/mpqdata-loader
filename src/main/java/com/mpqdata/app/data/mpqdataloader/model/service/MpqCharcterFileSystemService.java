@@ -1,16 +1,20 @@
 package com.mpqdata.app.data.mpqdataloader.model.service;
 
-import static com.mpqdata.app.data.mpqdataloader.model.Contants.*;
+import static com.mpqdata.app.data.mpqdataloader.model.Contants.DATE_FORMAT;
+import static com.mpqdata.app.data.mpqdataloader.model.domain.RarityLevel.RARITY_1;
+import static com.mpqdata.app.data.mpqdataloader.model.domain.RarityLevel.RARITY_2;
+import static com.mpqdata.app.data.mpqdataloader.model.domain.RarityLevel.RARITY_3;
+import static com.mpqdata.app.data.mpqdataloader.model.domain.RarityLevel.RARITY_4;
+import static com.mpqdata.app.data.mpqdataloader.model.domain.RarityLevel.RARITY_5;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-
-import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +25,7 @@ import org.springframework.stereotype.Service;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.mpqdata.app.data.mpqdataloader.MpqDataLoaderException;
+import com.mpqdata.app.data.mpqdataloader.model.Overrides;
 import com.mpqdata.app.data.mpqdataloader.model.domain.MpqCharacter;
 import com.mpqdata.app.data.mpqdataloader.model.repository.MpqCharacterRepository;
 import com.mpqdata.app.data.mpqdataloader.util.JsonPathUtils;
@@ -33,6 +38,9 @@ public class MpqCharcterFileSystemService {
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Autowired
+	private Overrides overrides;
+
+	@Autowired
 	@Setter
 	private MpqCharacterRepository mpqCharacterRepository;
 
@@ -40,7 +48,6 @@ public class MpqCharcterFileSystemService {
 	@Setter
 	private AbilityService abilityService;
 
-	@Transactional
 	public List<MpqCharacter> loadCharacterConfigs(File directory) {
 		List<MpqCharacter> characters = new ArrayList<>();
 
@@ -82,8 +89,20 @@ public class MpqCharcterFileSystemService {
 			mpqChar.setNameKey( doc.read("$." + charId + ".Name", String.class) );
 			mpqChar.setSubtitleKey( doc.read("$." + charId + ".Subtitle", String.class) );
 
+			Map<String, String> characterBioOverrides = overrides.getCharacterBioOverrides();
+			String characterBioKey = characterBioOverrides.containsKey(charId) ?
+				characterBioOverrides.get(charId) :
+				"Comic_Story_" + charId
+			;
+			mpqChar.setCharacterBioKey(characterBioKey);
+
 			String timestamp = doc.read("$." + charId + ".TimeVisibleAt", String.class) ;
-			mpqChar.setReleaseDate(DATE_FORMAT.parse(timestamp));
+			Date releaseDate = DATE_FORMAT.parse(timestamp);
+			Date now = new Date();
+			if (now.before(releaseDate)) {
+				return null;
+			}
+			mpqChar.setReleaseDate(releaseDate);
 
 			File levelFile = new File(file.getParentFile(), mpqChar.getMpqCharacterId() + "_Levels.json");
 			int rarity = extractRarityFromLevelFile(levelFile);
@@ -105,7 +124,13 @@ public class MpqCharcterFileSystemService {
 		}
 
 		/* HulkBruceBanner is the only character requiring this workaround */
-		Map<Integer, Integer> minLevelRarityMap = Map.of(1, 1, 15, 2, 40, 3, 70, 4, 255, 5);
+		Map<Integer, Integer> minLevelRarityMap = Map.of(
+			RARITY_1.minLevel(), RARITY_1.rarity(),
+			RARITY_2.minLevel(), RARITY_2.rarity(),
+			RARITY_3.minLevel(), RARITY_3.rarity(),
+			RARITY_4.minLevel(), RARITY_4.rarity(),
+			RARITY_5.minLevel(), RARITY_5.rarity()
+		);
 		List<?> levelBaseValues = JsonPath.parse(levelFile).read("$.*.EffectiveLevel.BaseValues[0]", List.class);
 		if ( ! levelBaseValues.isEmpty() ) {
 			int level = Integer.parseInt( levelBaseValues.get(0).toString() );
