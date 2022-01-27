@@ -18,6 +18,7 @@ public class MpqCharacter {
 	private String nameKey;
 	private String subtitleKey;
 	private int rarity;
+	private String characterBioKey;
 	private Date releaseDate;
 
 }
