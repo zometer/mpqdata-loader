@@ -40,13 +40,13 @@ public class SarUrlLookupService {
 	@Setter(AccessLevel.NONE)
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
-	@Value("${mpq.appstore.url}")
+	@Setter
 	private String appStoreUrl;
 
-	@Value("${mpq.appstore.version-html-element-selector}")
+	@Setter
 	private String appStoreVersionHtmlSelector;
 
-	@Value("${mpq.config.update-lookup-url}")
+	@Setter
 	private String mpqUpdateSarLookupUrl;
 
 	@Autowired

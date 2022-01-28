@@ -34,6 +34,15 @@ public class FetchAndExpandSarArchiveCommandLineRunner implements CommandLineRun
 	@Value("${mpq.config.download-dir}")
 	private String downloadDir;
 
+	@Value("${mpq.appstore.url}")
+	private String appStoreUrl;
+
+	@Value("${mpq.appstore.version-html-element-selector}")
+	private String appStoreVersionHtmlSelector;
+
+	@Value("${mpq.config.update-lookup-url}")
+	private String mpqUpdateSarLookupUrl;
+
 	@Autowired
 	@Setter
 	private SarUrlLookupService sarUrlLookupService;
@@ -53,6 +62,10 @@ public class FetchAndExpandSarArchiveCommandLineRunner implements CommandLineRun
 	@Override
 	public void run(String... args) throws Exception {
 		logger.info("Process start");
+
+		sarUrlLookupService.setAppStoreVersionHtmlSelector(appStoreVersionHtmlSelector);
+		sarUrlLookupService.setMpqUpdateSarLookupUrl(mpqUpdateSarLookupUrl);
+		sarUrlLookupService.setAppStoreUrl(appStoreUrl);
 		logger.info( sarUrlLookupService.getAppStoreUrl() );
 
 		String configSarUrl = sarUrlLookupService.retrieveConfigSarUrl();
