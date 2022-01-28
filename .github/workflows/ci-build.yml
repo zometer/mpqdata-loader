@@ -47,5 +47,8 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
     - name: Push image to Docker Hub 
-      run: docker push $GITHUB_REPOSITORY_OWNER/$artifact:$version
+      run: |
+        `grep "=" gradle.properties | sed s/^/"export "/g`
+        env
+        docker push $GITHUB_REPOSITORY_OWNER/$artifact:$version
  
