@@ -56,6 +56,8 @@ publishing {
 	}
 }
 
+tasks.jar.enabled = false
+
 springBoot {
 	buildInfo()
 }
