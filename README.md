@@ -7,11 +7,11 @@ archive and load updated character information to the database.
 
 ## Usage
 
-### Maven
+### gradle
 
 ````bash
 # Build the project
-$ ./mvnw build
+$ ./gradlew build
 ````
 
 ### Java
@@ -19,8 +19,27 @@ $ ./mvnw build
 ````bash
 # Run the application.
 # Be sure to set the profile on the command line, otherwise you won't have a data source.
-$ java -Dspring.profiles.active=local -jar target/mpqdata-loader-0.0.1-SNAPSHOT.jar
+$ java \
+		-Dspring.profiles.active=local,download-archive,load-database \
+		-Dspring.datasource.url=$DB_URL \
+		-Dspring.datasource.username=$DB_USERNAME \
+		-Dspring.datasource.password=$DB_PASSWORD \
+		-jar \
+		target/mpqdata-loader-0.0.1-SNAPSHOT.jar
 ````
+
+### Docker
+````bash
+# Run the application.
+$ docker run -it \
+		-e SPRING_PROFILES_ACTIVE=local,download-archive,load-database \
+		-e SPRING_DATASOURCE_URL=$DB_URL \
+		-e SPRING_DATAUSER_USERNAME=$DB_USERNAME \
+		-e SPRING_DATAUSER_PASSWORD=$DB_PASSWORD \
+		mpqdata-loader:latest
+````
+
+### Helm / Kubernetes
 
 
 ### CLI Utilities
@@ -43,7 +62,7 @@ done executing.
 
 ### Databases
 
-1. MPQDATA - Postgres database containing baseline MPQ character data. 
+1. MPQDATA - Postgres database containing baseline MPQ character data.
 
 ### Environment Variables
 
