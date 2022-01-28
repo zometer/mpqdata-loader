@@ -1,6 +1,6 @@
 package com.mpqdata.app.data.mpqdataloader.exec;
 
-import static com.mpqdata.app.data.mpqdataloader.model.Contants.*;
+import static com.mpqdata.app.data.mpqdataloader.model.Constants.*;
 import java.util.stream.Stream;
 
 import org.assertj.core.util.Arrays;

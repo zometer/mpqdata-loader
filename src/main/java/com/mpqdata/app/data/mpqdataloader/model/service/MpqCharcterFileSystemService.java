@@ -1,6 +1,6 @@
 package com.mpqdata.app.data.mpqdataloader.model.service;
 
-import static com.mpqdata.app.data.mpqdataloader.model.Contants.DATE_FORMAT;
+import static com.mpqdata.app.data.mpqdataloader.model.Constants.DATE_FORMAT;
 import static com.mpqdata.app.data.mpqdataloader.model.domain.RarityLevel.RARITY_1;
 import static com.mpqdata.app.data.mpqdataloader.model.domain.RarityLevel.RARITY_2;
 import static com.mpqdata.app.data.mpqdataloader.model.domain.RarityLevel.RARITY_3;
