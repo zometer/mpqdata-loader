@@ -12,6 +12,13 @@ on:
     branches: [ main, feature/**, bugfix/** ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+    inputs: 
+      gradleArgs: 
+        description: 'Additional Gradle parameters'     
+        required: false
+        default: '' 
+        type: text
 
 jobs:
   build:
