@@ -31,16 +31,16 @@ public class FetchAndExpandSarArchiveCommandLineRunner implements CommandLineRun
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
-	@Value("${mpq.config.download-dir}")
+	@Value("${mpq.archive-download.download-dir}")
 	private String downloadDir;
 
-	@Value("${mpq.appstore.url}")
+	@Value("${mpq.archive-download.appstore.url}")
 	private String appStoreUrl;
 
-	@Value("${mpq.appstore.version-html-element-selector}")
+	@Value("${mpq.archive-download.appstore.version-html-element-selector}")
 	private String appStoreVersionHtmlSelector;
 
-	@Value("${mpq.config.update-lookup-url}")
+	@Value("${mpq.archive-download.update-lookup-url}")
 	private String mpqUpdateSarLookupUrl;
 
 	@Autowired
