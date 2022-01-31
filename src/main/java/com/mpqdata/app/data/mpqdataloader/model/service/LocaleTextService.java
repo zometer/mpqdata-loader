@@ -3,9 +3,9 @@ package com.mpqdata.app.data.mpqdataloader.model.service;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +40,8 @@ public class LocaleTextService {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
+	// private Map<String, String> localeTextMap = new HashMap<>();
+
 	@Setter
 	private List<String> languages;
 
@@ -56,6 +58,7 @@ public class LocaleTextService {
 
 		logger.debug("[LOCALES]: " + keys);
 		for (String language : languages) {
+			localeTextRepository.deleteByLocaleLanguage(language);
 			loadLocaleText(language, keys, dataDir);
 		}
 
@@ -66,11 +69,28 @@ public class LocaleTextService {
 		File file = new File(dataDir, LANG_DIR_MAP.get(language) + "/locale.json" ) ;
 		File patchFile = new File(dataDir, LANG_DIR_MAP.get(language) + "/locale_patch.json" ) ;
 		List<LocaleText> localeTexts = new ArrayList<>();
+		Configuration config = Configuration.defaultConfiguration().addOptions(Option.SUPPRESS_EXCEPTIONS);
+		List<File> localeFiles = Arrays.asList(file, patchFile);
+
+		logger.info("    [LOCALES]: loading locale files[" + language + "]: " + localeFiles);
+		DocumentContext[] docs = localeFiles.stream()
+			.map(f -> {
+				try {
+					return JsonPath.using(config).parse(f);
+				} catch (IOException e) {
+					throw new MpqDataLoaderException("Error parsing JSON file: " + f.getAbsolutePath(), e);
+				}
+			})
+			.toList()
+			.toArray(new DocumentContext[0])
+		;
+		logger.info("    [LOCALES]: loading locale files[" + language + "]: complete");
 
 		try {
 			for (String key: keys) {
-				String text = readLocaleText(key, file, patchFile);
+				String text = readLocaleText(key, docs);
 				LocaleText localeText = new LocaleText(key, language, text);
+				logger.trace("    [LOCALES]: Read locale key: " + localeText);
 				localeTexts.add(localeText);
 			}
 
@@ -82,21 +102,15 @@ public class LocaleTextService {
 		}
 	}
 
-	protected String readLocaleText(String key, File...files) throws IOException {
-		Configuration config = Configuration.defaultConfiguration().addOptions(Option.SUPPRESS_EXCEPTIONS);
-		for (File file: files) {
-			if (! file.exists()) {
-				continue;
-			}
-			DocumentContext doc = JsonPath.using(config).parse(file);
+	protected String readLocaleText(String key, DocumentContext...docs) throws IOException {
+		for (DocumentContext doc: docs) {
 			String text = doc.read( "$." + key, String.class);
 			if (text != null) {
 				return text;
 			}
 		}
 
-		List<String> fileList = Stream.of(files).map(f -> f.getAbsolutePath()).toList();
-		throw new MpqDataLoaderException("Locale Key [" + key +"] not found in: " + fileList);
+		throw new MpqDataLoaderException("Locale Key [" + key +"] not found in locale files.");
 	}
 
 
