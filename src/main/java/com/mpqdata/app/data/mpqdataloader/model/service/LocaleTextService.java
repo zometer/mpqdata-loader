@@ -16,7 +16,6 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
-import com.jayway.jsonpath.PathNotFoundException;
 import com.mpqdata.app.data.mpqdataloader.MpqDataLoaderException;
 import com.mpqdata.app.data.mpqdataloader.model.domain.LocaleText;
 import com.mpqdata.app.data.mpqdataloader.model.repository.LocaleTextRepository;
@@ -39,8 +38,6 @@ public class LocaleTextService {
 	);
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
-
-	// private Map<String, String> localeTextMap = new HashMap<>();
 
 	@Setter
 	private List<String> languages;
@@ -95,8 +92,6 @@ public class LocaleTextService {
 			}
 
 			localeTextRepository.saveAll(localeTexts);
-		} catch (PathNotFoundException e) {
-
 		} catch (IOException e) {
 			throw new MpqDataLoaderException(e);
 		}
