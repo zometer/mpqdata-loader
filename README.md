@@ -48,8 +48,8 @@ $ helm repo add zometer https://zometer.github.io/helm-charts
 
 # Install the chart, which creates the cronjob
 $ helm install mpqdata-loader zometer/mpqdata-loader \
-		-n mpqdata \
-		-f values.yaml
+    -n mpqdata \
+    -f values.yaml
 
 # Create and run stand-alone manual job run
 $ kubectl create job --from=cronjob/mpqdata-loader-cron mpqdata-loader-job -n mpqdata
