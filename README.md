@@ -20,12 +20,12 @@ $ ./gradlew build
 # Run the application.
 # Be sure to set the profile on the command line, otherwise you won't have a data source.
 $ java \
-		-Dspring.profiles.active=download-archive,load-database \
-		-Dspring.datasource.url=$DB_URL \
-		-Dspring.datasource.username=$DB_USERNAME \
-		-Dspring.datasource.password=$DB_PASSWORD \
-		-jar \
-		target/mpqdata-loader-0.0.1-SNAPSHOT.jar
+    -Dspring.profiles.active=download-archive,load-database \
+    -Dspring.datasource.url=$DB_URL \
+    -Dspring.datasource.username=$DB_USERNAME \
+    -Dspring.datasource.password=$DB_PASSWORD \
+    -jar \
+    target/mpqdata-loader-0.0.1-SNAPSHOT.jar
 ````
 
 ### Docker
@@ -33,11 +33,11 @@ $ java \
 ````bash
 # Run the application.
 $ docker run -it \
-		-e SPRING_PROFILES_ACTIVE=download-archive,load-database \
-		-e SPRING_DATASOURCE_URL=$DB_URL \
-		-e SPRING_DATAUSER_USERNAME=$DB_USERNAME \
-		-e SPRING_DATAUSER_PASSWORD=$DB_PASSWORD \
-		mpqdata-loader:latest
+    -e SPRING_PROFILES_ACTIVE=download-archive,load-database \
+    -e SPRING_DATASOURCE_URL=$DB_URL \
+    -e SPRING_DATAUSER_USERNAME=$DB_USERNAME \
+    -e SPRING_DATAUSER_PASSWORD=$DB_PASSWORD \
+    mpqdata-loader:latest
 ````
 
 ### Helm / Kubernetes
