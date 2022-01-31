@@ -1,6 +1,6 @@
 package com.mpqdata.app.data.mpqdataloader.exec;
 
-import static com.mpqdata.app.data.mpqdataloader.exec.FetchAndExpandSarArchiveCommandLineRunner.EXPANDED_ARCHIVE_SUBDIR;
+import static com.mpqdata.app.data.mpqdataloader.exec.DownloadAndExpandSarArchiveCommandLineRunner.EXPANDED_ARCHIVE_SUBDIR;
 
 import java.io.File;
 import java.util.List;
