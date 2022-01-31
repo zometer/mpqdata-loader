@@ -1,0 +1,4 @@
+
+Cronjob created. To run this job now: 
+  
+  kubectl create job --namespace {{ .Release.Namespace }} --from=cronjob/{{ .Release.Name }}-cron {{ .Release.Name }}-job

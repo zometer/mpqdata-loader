@@ -1,0 +1,61 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}-cron
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    metadata:
+      name: {{ .Release.Name }}-cron
+    spec:
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          containers:
+            - image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              env: 
+                {{- if .Values.config.profiles.active}}
+                - name: SPRING_PROFILES_ACTIVE
+                  value: "{{ join "," .Values.config.profiles.active }}"
+                {{- end }}
+                {{- if .Values.config.cloudConfig.uri}}
+                - name: SPRING_CLOUD_CONFIG_URI
+                  value: "{{ .Values.config.cloudConfig.uri }}"
+                {{- end }}
+                {{- if .Values.config.db.url}}
+                - name: SPRING_DATASOURCE_URL
+                  value: "{{ .Values.config.db.url }}"
+                {{- end }}
+                {{- if .Values.config.db.username }}
+                - name: SPRING_DATASOURCE_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: "{{ .Release.Name }}-db-creds"
+                      key: "username"
+                {{- end }}
+                {{- if .Values.config.db.password }}
+                - name: SPRING_DATASOURCE_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: "{{ .Release.Name }}-db-creds"
+                      key: "password"
+                {{- end }}
+                {{- if .Values.extraEnv }}
+                  {{- toYaml .Values.extraEnv | nindent 10 }}
+                {{- end }}              
+              name: {{ .Chart.Name }}-cron
+              resources: {}
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+          dnsPolicy: ClusterFirst
+          restartPolicy: OnFailure
+          schedulerName: default-scheduler
+          securityContext: {}
+          terminationGracePeriodSeconds: 30
+  schedule: {{ .Values.cron.schedule }}
+  successfulJobsHistoryLimit: 3
+  suspend: false
+status: {}

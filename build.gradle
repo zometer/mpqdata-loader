@@ -3,7 +3,7 @@
  */
 
 plugins {
-	// id "com.gorylenko.gradle-git-properties" version "1.5.1"
+	id 'org.unbroken-dome.helm' version '1.7.0'
 	id 'org.springframework.boot' version '2.6.2'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
@@ -65,3 +65,12 @@ springBoot {
 tasks.withType(JavaCompile) {
 	options.encoding = 'UTF-8'
 }
+
+helm {
+	filtering {
+		values.put 'artifact', "${rootProject.name}"
+		values.put 'imageName', "zometer/${rootProject.name}"
+		values.put 'version', "${project.version}"
+	}
+}
+

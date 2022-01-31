@@ -20,12 +20,12 @@ $ ./gradlew build
 # Run the application.
 # Be sure to set the profile on the command line, otherwise you won't have a data source.
 $ java \
-    -Dspring.profiles.active=download-archive,load-database \
-    -Dspring.datasource.url=$DB_URL \
-    -Dspring.datasource.username=$DB_USERNAME \
-    -Dspring.datasource.password=$DB_PASSWORD \
-    -jar \
-    target/mpqdata-loader-0.0.1-SNAPSHOT.jar
+		-Dspring.profiles.active=download-archive,load-database \
+		-Dspring.datasource.url=$DB_URL \
+		-Dspring.datasource.username=$DB_USERNAME \
+		-Dspring.datasource.password=$DB_PASSWORD \
+		-jar \
+		target/mpqdata-loader-0.0.1-SNAPSHOT.jar
 ````
 
 ### Docker
@@ -33,11 +33,11 @@ $ java \
 ````bash
 # Run the application.
 $ docker run -it \
-    -e SPRING_PROFILES_ACTIVE=download-archive,load-database \
-    -e SPRING_DATASOURCE_URL=$DB_URL \
-    -e SPRING_DATAUSER_USERNAME=$DB_USERNAME \
-    -e SPRING_DATAUSER_PASSWORD=$DB_PASSWORD \
-    mpqdata-loader:latest
+		-e SPRING_PROFILES_ACTIVE=download-archive,load-database \
+		-e SPRING_DATASOURCE_URL=$DB_URL \
+		-e SPRING_DATAUSER_USERNAME=$DB_USERNAME \
+		-e SPRING_DATAUSER_PASSWORD=$DB_PASSWORD \
+		mpqdata-loader:latest
 ````
 
 ### Helm / Kubernetes
@@ -48,8 +48,8 @@ $ helm repo add zometer https://zometer.github.io/helm-charts
 
 # Install the chart, which creates the cronjob
 $ helm install mpqdata-loader zometer/mpqdata-loader \
-    -n mpqdata \
-    -f values.yaml
+		-n mpqdata \
+		-f values.yaml
 
 # Create and run stand-alone manual job run
 $ kubectl create job --from=cronjob/mpqdata-loader-cron mpqdata-loader-job -n mpqdata
@@ -94,8 +94,8 @@ done executing.
 
 ### Spring Profiles
 
-| Name      | Notes |
-|-----------|-------|
+| Name              | Notes |
+|-------------------|-------|
 | `default`         | This profile is loaded when none are specified and merged into all other profiles. |
 | `download-archive` | Tells the job to scrape the app store page for the current version and download and expand the latest sar archive. |
 | `load-database`    | Tells the job to read the data from the expanded archive data file and load that data into the database. | |
