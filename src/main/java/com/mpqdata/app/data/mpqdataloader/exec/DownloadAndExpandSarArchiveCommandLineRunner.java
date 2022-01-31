@@ -25,7 +25,7 @@ import lombok.Setter;
 @Order(0)
 @Profile("download-archive")
 @Component
-public class FetchAndExpandSarArchiveCommandLineRunner implements CommandLineRunner {
+public class DownloadAndExpandSarArchiveCommandLineRunner implements CommandLineRunner {
 
 	public static final String EXPANDED_ARCHIVE_SUBDIR = "/expanded";
 
