@@ -26,10 +26,10 @@ public class LoadDatabaseCommandLineRunner implements CommandLineRunner {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
-	@Value("${mpq.config.download-dir}")
+	@Value("${mpq.load.download-dir}")
 	private String downloadDir;
 
-	@Value("#{'${mpq.config.languages}'.split(',')}")
+	@Value("#{'${mpq.load.languages}'.split(',')}")
 	@Setter
 	private List<String> languages;
 
