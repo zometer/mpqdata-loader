@@ -74,6 +74,6 @@ helm {
 
 release {
 	git {
-		requireBranch = '/main|release/'
+		requireBranch = 'main|release'
 	}
 }
