@@ -58,16 +58,11 @@ jobs:
         `grep "=" build/gradle-release.properties | sed s/^/"export "/g`
         env
         docker push $GITHUB_REPOSITORY_OWNER/$artifact:$version
-  
-  chart-releaser:
-    runs-on: ubuntu-latest
-    container:
-      image: quay.io/helmpack/chart-releaser:v1.3.0
-    steps:
-         - name: Log the node version
-           run: |
-             env
-             pwd
-             ls -la 
-             cr upload --git-repo helm-charts --owner $GITHUB_REPOSITORY_OWNER --package-path build/helm/charts --token ${{ secrets.GITHUB_TOKEN }}
-             cr index  --git-repo helm-charts --owner $GITHUB_REPOSITORY_OWNER --package-path build/helm/charts --token ${{ secrets.GITHUB_TOKEN }} --push 
+    - name: Run chart-releaser
+      uses: helm/chart-releaser-action@v1.2.1
+      with: 
+        charts_dir: "build/helm/charts/"
+        charts_repo_url: "https://${{ env.GITHUB_REPOSITORY_OWNER }}.github.io/helm-chart"
+      env:
+        CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"    
+        
