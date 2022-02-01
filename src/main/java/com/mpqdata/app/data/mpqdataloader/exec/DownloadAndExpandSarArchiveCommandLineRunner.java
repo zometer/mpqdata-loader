@@ -25,14 +25,23 @@ import lombok.Setter;
 @Order(0)
 @Profile("download-archive")
 @Component
-public class FetchAndExpandSarArchiveCommandLineRunner implements CommandLineRunner {
+public class DownloadAndExpandSarArchiveCommandLineRunner implements CommandLineRunner {
 
 	public static final String EXPANDED_ARCHIVE_SUBDIR = "/expanded";
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
-	@Value("${mpq.config.download-dir}")
+	@Value("${mpq.archive-download.download-dir}")
 	private String downloadDir;
+
+	@Value("${mpq.archive-download.appstore.url}")
+	private String appStoreUrl;
+
+	@Value("${mpq.archive-download.appstore.version-html-element-selector}")
+	private String appStoreVersionHtmlSelector;
+
+	@Value("${mpq.archive-download.update-lookup-url}")
+	private String mpqUpdateSarLookupUrl;
 
 	@Autowired
 	@Setter
@@ -53,6 +62,10 @@ public class FetchAndExpandSarArchiveCommandLineRunner implements CommandLineRun
 	@Override
 	public void run(String... args) throws Exception {
 		logger.info("Process start");
+
+		sarUrlLookupService.setAppStoreVersionHtmlSelector(appStoreVersionHtmlSelector);
+		sarUrlLookupService.setMpqUpdateSarLookupUrl(mpqUpdateSarLookupUrl);
+		sarUrlLookupService.setAppStoreUrl(appStoreUrl);
 		logger.info( sarUrlLookupService.getAppStoreUrl() );
 
 		String configSarUrl = sarUrlLookupService.retrieveConfigSarUrl();

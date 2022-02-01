@@ -1,8 +1,9 @@
 package com.mpqdata.app.data.mpqdataloader.exec;
 
-import static com.mpqdata.app.data.mpqdataloader.exec.FetchAndExpandSarArchiveCommandLineRunner.EXPANDED_ARCHIVE_SUBDIR;
+import static com.mpqdata.app.data.mpqdataloader.exec.DownloadAndExpandSarArchiveCommandLineRunner.EXPANDED_ARCHIVE_SUBDIR;
 
 import java.io.File;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +26,12 @@ public class LoadDatabaseCommandLineRunner implements CommandLineRunner {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
-	@Value("${mpq.config.download-dir}")
+	@Value("${mpq.load.download-dir}")
 	private String downloadDir;
+
+	@Value("#{'${mpq.load.languages}'.split(',')}")
+	@Setter
+	private List<String> languages;
 
 	@Autowired
 	@Setter
@@ -45,6 +50,7 @@ public class LoadDatabaseCommandLineRunner implements CommandLineRunner {
 		File localeDir = new File(dataDir, "Loc");
 		mpqCharcterFileSystemService.loadCharacterConfigs(characterDir);
 
+		localeTextService.setLanguages(languages);
 		localeTextService.loadLocaleText(localeDir);
 
 		logger.info("Database Load Process complete");

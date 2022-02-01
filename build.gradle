@@ -1,0 +1,79 @@
+
+plugins {
+	id 'net.researchgate.release' version '2.8.1'
+	id 'org.unbroken-dome.helm' version '1.7.0'
+	id 'org.springframework.boot' version '2.6.2'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+	id 'maven-publish'
+}
+
+/*
+// moved to gradle.properties. Eclipse was not loading everything with this set here.
+ext {
+	set('springCloudVersion', "2021.0.0")
+}
+*/
+
+sourceCompatibility = '17'
+
+repositories {
+	mavenLocal()
+	maven {
+		url = uri('https://repo.maven.apache.org/maven2/')
+	}
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.cloud:spring-cloud-starter-config'
+	implementation 'org.apache.commons:commons-lang3'
+	implementation 'org.jsoup:jsoup:1.14.3'
+	implementation 'com.github.luben:zstd-jni:1.5.1-1'
+	implementation 'org.lz4:lz4-java:1.8.0'
+	implementation 'com.jayway.jsonpath:json-path:2.6.0'
+	implementation 'org.projectlombok:lombok'
+	implementation 'org.springframework.boot:spring-boot-starter-test'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	runtimeOnly 'org.postgresql:postgresql'
+	testImplementation 'org.mockito:mockito-core'
+}
+
+publishing {
+	publications {
+		maven(MavenPublication) {
+			from(components.java)
+		}
+	}
+}
+
+tasks.jar.enabled = false
+
+springBoot {
+	buildInfo()
+}
+
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
+
+helm {
+	filtering {
+		values.put 'artifact', "${rootProject.name}"
+		values.put 'imageName', "zometer/${rootProject.name}"
+		values.put 'version', "${project.version}"
+	}
+}
+
+release {
+	git {
+		requireBranch = '/main|release/'
+	}
+}
