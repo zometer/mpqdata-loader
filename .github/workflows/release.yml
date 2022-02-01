@@ -27,18 +27,33 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
+    - name: Get Build and Release Version
+      run: | 
+        `grep "=" gradle.properties | sed s/^/"export "/g`
+        export RELEASE_VERSION=`echo $version | sed -e s/-SNAPSHOT//`
+        env
     - name: Build with Gradle
       uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
       with:
-        arguments: build ${{ github.event.inputs.gradleArgs }}
+        arguments: release ${{ github.event.inputs.gradleArgs }}
     - name: Examine Build directory
       run: | 
+        env
         ls -lR build/ 
         rm build/libs/*-SNAPSHOT*.jar
         ls -l build/libs/ 
     - name: Build Docker Image 
       run: |
-        `grep "=" gradle.properties | sed s/^/"export "/g`
+        #`grep "=" gradle.properties | sed s/^/"export "/g`
         env
-        docker build . --file Dockerfile --tag $GITHUB_REPOSITORY_OWNER/$artifact:$version
-        docker image ls $GITHUB_REPOSITORY_OWNER/$artifact
+        echo "docker build . --file Dockerfile --tag $GITHUB_REPOSITORY_OWNER/$artifact:$RELEASE_VERSION"
+    - name: Log in to Docker Hub
+      uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Push image to Docker Hub 
+      run: |
+        #`grep "=" gradle.properties | sed s/^/"export "/g`
+        env
+        echo "docker push $GITHUB_REPOSITORY_OWNER/$artifact:$RELEASE_VERSION"
