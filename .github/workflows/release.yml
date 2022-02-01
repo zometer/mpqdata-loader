@@ -32,8 +32,8 @@ jobs:
         `grep "=" gradle.properties | sed s/^/"export "/g`
         export RELEASE_VERSION=`echo $version | sed -e s/-SNAPSHOT//`
         env
-        git config --global user.email "release-no-reply@noreply.github.com"
-        git config --global user.name "Gradle Release Plugin"
+        git config user.name "$GITHUB_ACTOR - RELEASE BUILD"
+        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
     - name: Build with Gradle
       uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
       with:
@@ -43,12 +43,11 @@ jobs:
         env
         ls -lR build/ 
         rm build/libs/*-SNAPSHOT*.jar
-        ls -l build/libs/ 
     - name: Build Docker Image 
       run: |
-        #`grep "=" gradle.properties | sed s/^/"export "/g`
+        `grep "=" gradle-release.properties | sed s/^/"export "/g`
         env
-        echo "docker build . --file Dockerfile --tag $GITHUB_REPOSITORY_OWNER/$artifact:$RELEASE_VERSION"
+        echo "docker build . --file Dockerfile --tag $GITHUB_REPOSITORY_OWNER/$artifact:$version"
     - name: Log in to Docker Hub
       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
       with:
@@ -56,6 +55,14 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
     - name: Push image to Docker Hub 
       run: |
-        #`grep "=" gradle.properties | sed s/^/"export "/g`
+        `grep "=" gradle-release.properties | sed s/^/"export "/g`
         env
-        echo "docker push $GITHUB_REPOSITORY_OWNER/$artifact:$RELEASE_VERSION"
+        echo "docker push $GITHUB_REPOSITORY_OWNER/$artifact:$version"
+    - name: Run chart-releaser
+      uses: helm/chart-releaser-action@v1.2.1
+      env:
+        CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"    
+        CR_OWNER: "${{ env.GITHUB_REPOSITORY_OWNER }}"
+        CR_GIT_REPO: "helm-charts"
+        CR_PACKAGE_PATH: "build/helm/charts/"
+        CR_SKIP_EXISTING: true
