@@ -44,11 +44,6 @@ jobs:
         mkdir -p build/ && cp gradle.properties build/gradle-release.properties
         env
         ls -l build/libs build/helm/charts
-    - name: "Upload Artifact: Helm Chart"
-      uses: actions/upload-artifact@v2
-      with:
-        name: helm-chart
-        path: builds/lib/helm/*.tgz        
     - name: Build Docker Image 
       run: |
         `grep "=" build/gradle-release.properties | sed s/^/"export "/g`
@@ -65,6 +60,11 @@ jobs:
         `grep "=" build/gradle-release.properties | sed s/^/"export "/g`
         env
         docker push $GITHUB_REPOSITORY_OWNER/$artifact:$version
+    - name: "Upload Artifact: Helm Chart"
+      uses: actions/upload-artifact@v2
+      with:
+        name: helm-chart
+        path: build/helm/charts/*.tgz        
     - name: Run chart-releaser
       uses: helm/chart-releaser-action@v1.2.1
       with: 
