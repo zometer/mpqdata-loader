@@ -44,9 +44,11 @@ jobs:
         ls -l build/libs build/helm/charts
     - name: Build Docker Image 
       run: |
-        `grep "=" gradle-release.properties | sed s/^/"export "/g`
+        `grep "=" build/gradle-release.properties | sed s/^/"export "/g`
         env
         docker build . --file Dockerfile --tag $GITHUB_REPOSITORY_OWNER/$artifact:$version
+      env: 
+        REPO_OWNER: ${{ env.GITHUB_REPOSITORY_OWNER }}
     - name: Log in to Docker Hub
       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
       with:
@@ -54,9 +56,11 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
     - name: Push image to Docker Hub 
       run: |
-        `grep "=" gradle-release.properties | sed s/^/"export "/g`
+        `grep "=" build/gradle-release.properties | sed s/^/"export "/g`
         env
-        docker push $GITHUB_REPOSITORY_OWNER/$artifact:$version
+        docker push $REPO_OWNER/$artifact:$version
+      env: 
+        REPO_OWNER: ${{ env.GITHUB_REPOSITORY_OWNER }}
     - name: Run chart-releaser
       uses: helm/chart-releaser-action@v1.2.1
       env:
