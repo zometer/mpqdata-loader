@@ -67,5 +67,7 @@ jobs:
          - name: Log the node version
            run: |
              env
+             pwd
+             ls -la 
              cr upload --git-repo helm-charts --owner $GITHUB_REPOSITORY_OWNER --package-path build/helm/charts --token ${{ secrets.GITHUB_TOKEN }}
              cr index  --git-repo helm-charts --owner $GITHUB_REPOSITORY_OWNER --package-path build/helm/charts --token ${{ secrets.GITHUB_TOKEN }} --push 
