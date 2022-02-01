@@ -45,11 +45,9 @@ jobs:
     - name: Build Docker Image 
       run: |
         `grep "=" build/gradle-release.properties | sed s/^/"export "/g`
-        echo "${{ env.GITHUB_REPOSITORY_OWNER }}/$artifact:version"
+        echo "${{ env.GITHUB_REPOSITORY_OWNER }}/$artifact:$version"
         env
         docker build . --file Dockerfile --tag $GITHUB_REPOSITORY_OWNER/$artifact:$version
-      env: 
-        REPO_OWNER: ${{ env.GITHUB_REPOSITORY_OWNER }}
     - name: Log in to Docker Hub
       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
       with:
@@ -59,9 +57,7 @@ jobs:
       run: |
         `grep "=" build/gradle-release.properties | sed s/^/"export "/g`
         env
-        docker push $REPO_OWNER/$artifact:$version
-      env: 
-        REPO_OWNER: ${{ env.GITHUB_REPOSITORY_OWNER }}
+        docker push $GITHUB_REPOSITORY_OWNER/$artifact:$version
     - name: Run chart-releaser
       uses: helm/chart-releaser-action@v1.2.1
       env:
