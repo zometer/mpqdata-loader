@@ -41,7 +41,7 @@ jobs:
     - name: Examine Build directory
       run: | 
         env
-        ls -lR build/ 
+        ls -l build/libs build/helm/charts
         rm build/libs/*-SNAPSHOT*.jar
     - name: Build Docker Image 
       run: |
