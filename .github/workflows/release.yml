@@ -62,7 +62,7 @@ jobs:
       uses: helm/chart-releaser-action@v1.2.1
       with: 
         charts_dir: "build/helm/charts/"
-        charts_repo_url: "https://${{ env.GITHUB_REPOSITORY_OWNER }}.github.io/helm-chart"
+        charts_repo_url: "https://zometer.github.io/helm-charts"
       env:
         CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"    
         
