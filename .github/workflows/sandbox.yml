@@ -62,7 +62,7 @@ jobs:
         docker push $GITHUB_REPOSITORY_OWNER/$artifact:$version
     - name: Create Release With Asset
       id: Release-AIO
-      uses: Hs1r1us/Release-AIO@v1
+      uses: Hs1r1us/Release-AIO@v1.0
       env:
         GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}
       with:
