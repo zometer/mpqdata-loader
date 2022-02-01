@@ -64,7 +64,7 @@ jobs:
       id: Release-AIO
       uses: Hs1r1us/Release-AIO@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}
       with:
         tag_name: ${{ env.artifact }}-${{env.version}}
         asset_files: './build/helm/charts/*.tgz'
