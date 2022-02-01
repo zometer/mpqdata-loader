@@ -28,7 +28,8 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
     - name: Get Build and Release Version
-      run: | 
+      run: |
+        echo "git ref: $GITHUB_REF_NAME"
         `grep "=" gradle.properties | sed s/^/"export "/g`
         export RELEASE_VERSION=`echo $version | sed -e s/-SNAPSHOT//`
         env
