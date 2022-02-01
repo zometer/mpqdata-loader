@@ -60,6 +60,12 @@ jobs:
         `grep "=" build/gradle-release.properties | sed s/^/"export "/g`
         env
         docker push $GITHUB_REPOSITORY_OWNER/$artifact:$version
+    - name: Troubleshoot Release-AIO
+      id: Release-AIO-troubleshoot
+      run: |
+        ls -l 
+      env:
+        GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}
     - name: Create Release With Asset
       id: Release-AIO
       uses: Hs1r1us/Release-AIO@v1.0
