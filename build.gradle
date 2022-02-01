@@ -77,3 +77,13 @@ release {
 		requireBranch = 'main'
 	}
 }
+
+
+tasks.register('copyReleaseProperties', Copy) {
+	from 'gradle.properties'
+	into "$buildDir"
+	rename "gradle.properties", "gradle-release.properties"
+}
+tasks.afterReleaseBuild.dependsOn copyReleaseProperties
+
+
