@@ -32,6 +32,8 @@ jobs:
         `grep "=" gradle.properties | sed s/^/"export "/g`
         export RELEASE_VERSION=`echo $version | sed -e s/-SNAPSHOT//`
         env
+        git config --global user.email "release-no-reply@noreply.github.com"
+        git config --global user.name "Gradle Release Plugin"
     - name: Build with Gradle
       uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
       with:
