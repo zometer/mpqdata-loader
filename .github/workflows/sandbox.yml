@@ -60,11 +60,14 @@ jobs:
         `grep "=" build/gradle-release.properties | sed s/^/"export "/g`
         env
         docker push $GITHUB_REPOSITORY_OWNER/$artifact:$version
-    - name: "Upload Artifact: Helm Chart"
-      uses: actions/upload-artifact@v2
+    - name: Create Release With Asset
+      id: Release-AIO
+      uses: Hs1r1us/Release-AIO@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        name: helm-chart
-        path: build/helm/charts/*.tgz        
+        tag_name: ${{ env.artifact }}-${{env.version}}
+        asset_files: './build/helm/charts/*.tgz'
     - name: Run chart-releaser
       uses: helm/chart-releaser-action@v1.2.1
       with: 
