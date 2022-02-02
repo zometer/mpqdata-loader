@@ -100,7 +100,7 @@ jobs:
           export description=$(cat $ARTIFACT/Chart.yaml| yq e '.description' - | sed -e s/\"//g) 
           echo "desc: $description"
           echo "::set-output name=DESCRIPTION::$description"
-          echo "::set-output name=CHART_DIR::$PWD"
+          echo "::set-output name=CHART_DIR::$(pwd)"
           echo "::set-output name=GIT_REPO_DIR::$(mkdir git-repos)"
         env: 
           ARTIFACT: ${{needs.build.outputs.ARTIFACT}}
