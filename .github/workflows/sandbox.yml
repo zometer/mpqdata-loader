@@ -17,6 +17,22 @@ on:
         required: false
         default: ''
         type: string
+      helmChartRepoOwner: 
+        description: 'Helm Chart Repository Owner'
+        required: true
+        default: ${{ github.repository_owner }}
+        type: string
+      helmChartRepo: 
+        description: 'Helm Chart Repository'
+        required: true
+        default: 'helm-charts'
+        type: string
+      helmChartRepoBranch: 
+        description: 'Helm chart index branch'
+        required: true
+        default: 'gh-pages'
+        type: string
+        
 jobs:
   build:
 
@@ -25,7 +41,6 @@ jobs:
       GROUP: ${{ steps.releaseVars.outputs.GROUP }}
       ARTIFACT: ${{ steps.releaseVars.outputs.ARTIFACT }}
       VERSION: ${{ steps.releaseVars.outputs.VERSION }}
-      RELEASE_VERSION: ${{ steps.releaseVars.outputs.RELEASE_VERSION }}
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 17
@@ -33,24 +48,20 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-    - name: Get Build and Release Version
-      id: releaseVars
-      run: |
-        `grep "=" gradle.properties | sed s/^/"export "/g`
-        export RELEASE_VERSION=`echo $version | sed -e s/-SNAPSHOT//`
-        env
-        echo "::set-output name=GROUP::$group"
-        echo "::set-output name=ARTIFACT::$artifact"
-        echo "::set-output name=VERSION::$version"
-        echo "::set-output name=RELEASE_VERSION::$RELEASE_VERSION"
     - name: Set Git User
-      run: |
-        git config user.name "$GITHUB_ACTOR - RELEASE BUILD"
-        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+      run: git config -l 
     - name: Build with Gradle
       uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
       with:
         arguments: build -Prelease.useAutomaticVersion=true ${{ github.event.inputs.gradleArgs }}
+    - name: Get Build and Release Version
+      id: releaseVars
+      run: |
+        `cat build/resources/main/META-INF/build-info.properties | sed -e s/build./export\ /g`
+        env
+        echo "::set-output name=GROUP::$group"
+        echo "::set-output name=ARTIFACT::$artifact"
+        echo "::set-output name=VERSION::$version"
     - name: Examine Build directory
       run: |
         mkdir -p build/ && cp gradle.properties build/gradle-release.properties
