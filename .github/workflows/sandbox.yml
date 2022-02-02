@@ -123,5 +123,5 @@ jobs:
           cat index.yaml 
         env:
           GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}    
-          GIT_REPO_DIR: ${{ steps.prep-helm-deploy.outputs.GIT_REPO_DIR }}
+          GIT_REPO_DIR: helm-charts # ${{ steps.prep-helm-deploy.outputs.GIT_REPO_DIR }}
           HELM_CHARTS_GIT_REPO: helm-charts   
