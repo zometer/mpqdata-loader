@@ -75,7 +75,8 @@ jobs:
         `grep "=" build/gradle-release.properties | sed s/^/"export "/g`
         env
         docker push $GITHUB_REPOSITORY_OWNER/$artifact:$version
-  deploy: 
+  deploy-helm-chart: 
+    name: Deploy Helm Chart
     runs-on: ubuntu-latest
     needs: build 
     steps: 
@@ -89,10 +90,14 @@ jobs:
         uses: actions/download-artifact@v2.1.0
         with:
           name: helm-chart
-      - name: Build Dir
+      - name: Prepare Deployment
+        id: prep-helm-deploy
         run: | 
           ls -l ./ 
-          yq --help
+          tar zxvf $ARTIFACT-$VERSION.tgz
+          export description=$(cat $ARTIFACT/Chart.yaml| yq -r '.description') 
+          echo "desc: $description"
+          echo "::set-output name=DESCRIPTION::$description"
         env: 
           ARTIFACT: ${{needs.build.outputs.ARTIFACT}}
           VERSION: ${{needs.build.outputs.VERSION}}
@@ -100,7 +105,7 @@ jobs:
       - name: Troubleshoot Release-AIO
         id: Release-AIO-troubleshoot
         run: |
-          ls -l 
+          ls -l           
         env:
           GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}
       - name: Create Release With Asset
