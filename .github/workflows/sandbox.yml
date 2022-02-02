@@ -36,6 +36,7 @@ jobs:
       run: |
         `grep "=" gradle.properties | sed s/^/"export "/g`
         export RELEASE_VERSION=`echo $version | sed -e s/-SNAPSHOT//`
+        env
         echo "::set-output name=GROUP::$group"
         echo "::set-output name=ARTIFACT::$artifact"
         echo "::set-output name=VERSION::$version"
