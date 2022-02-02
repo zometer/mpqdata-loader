@@ -78,6 +78,7 @@ jobs:
         name: helm-chart
         path: build/helm/charts/*.tgz
   deploy-helm-chart:
+    needs: build
     uses: zometer/github-actions/.github/workflows/push-helm-chart.yml@main
     with: 
       helmChartRepo: ${{ github.event.inputs.helmChartRepo }} 
