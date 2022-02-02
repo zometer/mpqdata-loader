@@ -54,6 +54,11 @@ jobs:
         mkdir -p build/ && cp gradle.properties build/gradle-release.properties
         env
         ls -l build/libs build/helm/charts
+    - name: Upload Helm Chart Artifact
+      uses: actions/download-artifact@v2.1.0
+      with:
+        name: helm-chart
+        path: build/helm/charts/*.tgz
     - name: Build Docker Image 
       run: |
         `grep "=" build/gradle-release.properties | sed s/^/"export "/g`
@@ -80,6 +85,10 @@ jobs:
           ARTIFACT: ${{needs.build.outputs.ARTIFACT}}
           VERSION: ${{needs.build.outputs.VERSION}}
           RELEASE_VERSION: ${{needs.build.outputs.RELEASE_VERSION}}
+      - name: Download a Build Artifact
+        uses: actions/download-artifact@v2.1.0
+        with:
+          name: helm-chart
       - name: Build Dir
         run: | 
           ls -l ./ 
