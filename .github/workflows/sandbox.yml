@@ -7,6 +7,8 @@
 
 name: Sandbox
 
+# TODO: helm-chart repo input and defaults for deploy job. 
+
 on:
   workflow_dispatch:
     inputs: 
@@ -14,7 +16,7 @@ on:
         description: 'Additional Gradle parameters'     
         required: false
         default: '' 
-        type: text
+        type: string
 jobs:
   build:
 
@@ -98,6 +100,8 @@ jobs:
           export description=$(cat $ARTIFACT/Chart.yaml| yq e '.description' - | sed -e s/\"//g) 
           echo "desc: $description"
           echo "::set-output name=DESCRIPTION::$description"
+          echo "::set-output name=CHART_DIR::$PWD"
+          echo "::set-output name=GIT_REPO_DIR::$(mktemp -d)"
         env: 
           ARTIFACT: ${{needs.build.outputs.ARTIFACT}}
           VERSION: ${{needs.build.outputs.VERSION}}
@@ -107,5 +111,22 @@ jobs:
         run: |
           ls -l
           helm version 
+        env:
+          GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}          
+      - name: Set Git User
+        run: |
+          git config user.name "$GITHUB_ACTOR - RELEASE BUILD"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"      
+      - name: Checkout Helm Chart Repo
+        id: checkout-helm-repo
+        run: |
+          cd $GIT_REPO_DIR
+          git clone https://github.com/${GITHUB_REPOSITORY_OWNER}/helm-charts
+          git checkout gh-pages
+          
+          cd $CHART_DIR
+          export CHAR_DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY_OWNER}/helm-charts/releases/download/${ARTIFACT}-${VERSION}"
+          helm repo index --url $CHAR_DOWNLOAD_URL --merge $GIT_REPO_DIR/index.yaml .
+          cat index.yaml 
         env:
           GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}          
