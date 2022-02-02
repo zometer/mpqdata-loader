@@ -55,7 +55,7 @@ jobs:
         env
         ls -l build/libs build/helm/charts
     - name: Upload Helm Chart Artifact
-      uses: actions/download-artifact@v2.1.0
+      uses: actions/upload-artifact@v2.3.1
       with:
         name: helm-chart
         path: build/helm/charts/*.tgz
