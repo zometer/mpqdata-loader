@@ -83,6 +83,6 @@ jobs:
     with: 
       helmChartRepo: ${{ github.event.inputs.helmChartRepo }} 
       helmChartRepoBranch: ${{ github.event.inputs.helmChartRepoBranch }}
-      artifactName: ${{ github.event.inputs.artifactName }}
+      artifactName: helm-chart
     secrets: 
       githubToken: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}
