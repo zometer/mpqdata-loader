@@ -7,15 +7,15 @@
 
 name: Sandbox
 
-# TODO: helm-chart repo input and defaults for deploy job. 
+# TODO: helm-chart repo input and defaults for deploy job.
 
 on:
   workflow_dispatch:
-    inputs: 
-      gradleArgs: 
-        description: 'Additional Gradle parameters'     
+    inputs:
+      gradleArgs:
+        description: 'Additional Gradle parameters'
         required: false
-        default: '' 
+        default: ''
         type: string
 jobs:
   build:
@@ -46,13 +46,13 @@ jobs:
     - name: Set Git User
       run: |
         git config user.name "$GITHUB_ACTOR - RELEASE BUILD"
-        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"      
+        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
     - name: Build with Gradle
       uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
       with:
         arguments: build -Prelease.useAutomaticVersion=true ${{ github.event.inputs.gradleArgs }}
     - name: Examine Build directory
-      run: | 
+      run: |
         mkdir -p build/ && cp gradle.properties build/gradle-release.properties
         env
         ls -l build/libs build/helm/charts
@@ -61,7 +61,7 @@ jobs:
       with:
         name: helm-chart
         path: build/helm/charts/*.tgz
-    - name: Build Docker Image 
+    - name: Build Docker Image
       run: |
         `grep "=" build/gradle-release.properties | sed s/^/"export "/g`
         echo "${{ env.GITHUB_REPOSITORY_OWNER }}/$artifact:$version"
@@ -72,19 +72,19 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-    - name: Push image to Docker Hub 
+    - name: Push image to Docker Hub
       run: |
         `grep "=" build/gradle-release.properties | sed s/^/"export "/g`
         env
         docker push $GITHUB_REPOSITORY_OWNER/$artifact:$version
-  deploy-helm-chart: 
+  deploy-helm-chart:
     name: Deploy Helm Chart
     runs-on: ubuntu-latest
-    needs: build 
-    steps: 
+    needs: build
+    steps:
       - name: Deploy Init
         run: env
-        env: 
+        env:
           ARTIFACT: ${{needs.build.outputs.ARTIFACT}}
           VERSION: ${{needs.build.outputs.VERSION}}
           RELEASE_VERSION: ${{needs.build.outputs.RELEASE_VERSION}}
@@ -94,17 +94,17 @@ jobs:
           name: helm-chart
       - name: Prepare Deployment
         id: prep-helm-deploy
-        run: | 
-          ls -l ./ 
+        run: |
+          ls -l ./
           tar zxvf $ARTIFACT-$VERSION.tgz
-          export description=$(cat $ARTIFACT/Chart.yaml| yq e '.description' - | sed -e s/\"//g) 
+          export description=$(cat $ARTIFACT/Chart.yaml| yq e '.description' - | sed -e s/\"//g)
           mkdir git-repos
           echo "desc: $description"
           echo "::set-output name=DESCRIPTION::$description"
           echo "::set-output name=CHART_DIR::$(pwd)"
           echo "::set-output name=GIT_REPO_DIR::git-repos"
           ls -la $PWD
-        env: 
+        env:
           ARTIFACT: ${{needs.build.outputs.ARTIFACT}}
           VERSION: ${{needs.build.outputs.VERSION}}
           RELEASE_VERSION: ${{needs.build.outputs.RELEASE_VERSION}}
@@ -112,34 +112,51 @@ jobs:
         id: checkout-helm-repo
         run: |
           cd $GIT_REPO_DIR/
-          pwd 
-          ls -la 
-          git clone https://github.com/${GITHUB_REPOSITORY_OWNER}/${HELM_CHARTS_GIT_REPO}
+          pwd
+          ls -la
+          git clone https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY_OWNER}/${HELM_CHARTS_GIT_REPO}
           cd ${HELM_CHARTS_GIT_REPO}
           git config user.name "$GITHUB_ACTOR - RELEASE BUILD"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"      
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
           git checkout gh-pages
-          ls -la 
+          ls -la
         env:
-          GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}    
+          GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}
           CHART_DIR: ${{ steps.prep-helm-deploy.outputs.CHART_DIR }}
           GIT_REPO_DIR: ${{ steps.prep-helm-deploy.outputs.GIT_REPO_DIR }}
-          HELM_CHARTS_GIT_REPO: helm-charts             
+          HELM_CHARTS_GIT_REPO: helm-charts
       - name: Generate Updated index.yaml
         id: update-helm-repo-index
         run: |
           cd $CHART_DIR
-          pwd 
-          ls -la 
+          pwd
+          ls -la
           export CHART_DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY_OWNER}/${HELM_CHARTS_GIT_REPO}/releases/download/${ARTIFACT}-${VERSION}"
           echo "helm repo index --url $CHART_DOWNLOAD_URL --merge $GIT_REPO_DIR/${HELM_CHARTS_GIT_REPO}/index.yaml ."
           helm repo index --url $CHART_DOWNLOAD_URL --merge $GIT_REPO_DIR/${HELM_CHARTS_GIT_REPO}/index.yaml .
-          cat index.yaml 
+          cat index.yaml
+          mv index.yaml $GIT_REPO_DIR/$HELM_CHARTS_GIT_REPO
         env:
           ARTIFACT: ${{needs.build.outputs.ARTIFACT}}
           VERSION: ${{needs.build.outputs.VERSION}}
           RELEASE_VERSION: ${{needs.build.outputs.RELEASE_VERSION}}
-          GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}    
+          GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}
           CHART_DIR: ${{ steps.prep-helm-deploy.outputs.CHART_DIR }}
           GIT_REPO_DIR: ${{ steps.prep-helm-deploy.outputs.GIT_REPO_DIR }}
-          HELM_CHARTS_GIT_REPO: helm-charts   
+          HELM_CHARTS_GIT_REPO: helm-charts
+      - name: Push Helm Chart Repo
+        id: push-helm-repo
+        run: |
+          cd $GIT_REPO_DIR/$HELM_CHARTS_GIT_REPO
+          ls -la
+          git add index.yaml
+          git status 
+          git commit -m "Updating index.yaml: ${ARTIFACT}-${VERSION}"
+          git push
+        env:
+          ARTIFACT: ${{needs.build.outputs.ARTIFACT}}
+          VERSION: ${{needs.build.outputs.VERSION}}
+          GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}
+          CHART_DIR: ${{ steps.prep-helm-deploy.outputs.CHART_DIR }}
+          GIT_REPO_DIR: ${{ steps.prep-helm-deploy.outputs.GIT_REPO_DIR }}
+          HELM_CHARTS_GIT_REPO: helm-charts
