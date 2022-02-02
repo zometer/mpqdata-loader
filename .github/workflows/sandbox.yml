@@ -101,7 +101,7 @@ jobs:
           echo "desc: $description"
           echo "::set-output name=DESCRIPTION::$description"
           echo "::set-output name=CHART_DIR::$PWD"
-          echo "::set-output name=GIT_REPO_DIR::$(mktemp -d)"
+          echo "::set-output name=GIT_REPO_DIR::$(mkdir git-repos)"
         env: 
           ARTIFACT: ${{needs.build.outputs.ARTIFACT}}
           VERSION: ${{needs.build.outputs.VERSION}}
