@@ -20,7 +20,7 @@ on:
       helmChartRepoOwner: 
         description: 'Helm Chart Repository Owner'
         required: true
-        default: ${{ github.repository_owner }}
+        default: "${{ github.repository_owner }}"
         type: string
       helmChartRepo: 
         description: 'Helm Chart Repository'
