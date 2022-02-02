@@ -120,13 +120,20 @@ jobs:
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"      
           git checkout gh-pages
           ls -la 
-          
+        env:
+          GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}    
+          CHART_DIR: ${{ steps.prep-helm-deploy.outputs.CHART_DIR }}
+          GIT_REPO_DIR: ${{ steps.prep-helm-deploy.outputs.GIT_REPO_DIR }}
+          HELM_CHARTS_GIT_REPO: helm-charts             
+      - name: Checkout Helm Chart Repo
+        id: checkout-helm-repo
+        run: |
           cd $CHART_DIR
           pwd 
           ls -la 
           export CHART_DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY_OWNER}/${HELM_CHARTS_GIT_REPO}/releases/download/${ARTIFACT}-${VERSION}"
-          echo "helm repo index --url $CHART_DOWNLOAD_URL --merge $GIT_REPO_DIR/index.yaml ."
-          helm repo index --url $CHART_DOWNLOAD_URL --merge $GIT_REPO_DIR/index.yaml .
+          echo "helm repo index --url $CHART_DOWNLOAD_URL --merge $GIT_REPO_DIR/${HELM_CHARTS_GIT_REPO}/index.yaml ."
+          helm repo index --url $CHART_DOWNLOAD_URL --merge $GIT_REPO_DIR/${HELM_CHARTS_GIT_REPO}/index.yaml .
           cat index.yaml 
         env:
           ARTIFACT: ${{needs.build.outputs.ARTIFACT}}
