@@ -102,6 +102,7 @@ jobs:
           echo "::set-output name=DESCRIPTION::$description"
           echo "::set-output name=CHART_DIR::$(pwd)"
           echo "::set-output name=GIT_REPO_DIR::$(mkdir git-repos)"
+          ls -la $PWD
         env: 
           ARTIFACT: ${{needs.build.outputs.ARTIFACT}}
           VERSION: ${{needs.build.outputs.VERSION}}
