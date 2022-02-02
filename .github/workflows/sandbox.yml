@@ -125,8 +125,8 @@ jobs:
           CHART_DIR: ${{ steps.prep-helm-deploy.outputs.CHART_DIR }}
           GIT_REPO_DIR: ${{ steps.prep-helm-deploy.outputs.GIT_REPO_DIR }}
           HELM_CHARTS_GIT_REPO: helm-charts             
-      - name: Checkout Helm Chart Repo
-        id: checkout-helm-repo
+      - name: Generate Updated index.yaml
+        id: update-helm-repo-index
         run: |
           cd $CHART_DIR
           pwd 
