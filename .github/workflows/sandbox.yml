@@ -107,15 +107,17 @@ jobs:
         run: |
           ls -l           
         env:
-          GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}          
       - name: Create Release With Asset
         id: Release-AIO
         uses: Hs1r1us/Release-AIO@v1.0
         env:
           GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}
         with:
-          tag_name: ${{ env.ARTIFACT }}-${{env.VERSION}}
-          asset_files: './*.tgz'
+          tag_name: ${{needs.build.outputs.ARTIFACT}}-${{needs.build.outputs.VERSION}}
+          body: ${{ steps.prep-helm-deploy.outputs.DESCRIPTION }}
+          asset_files: ${{needs.build.outputs.ARTIFACT}}-${{needs.build.outputs.VERSION}}.tgz
+          repo: ${{ github.repository_owner }}/helm-charts
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.2.1
         with: 
