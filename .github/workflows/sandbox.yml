@@ -98,10 +98,11 @@ jobs:
           ls -l ./ 
           tar zxvf $ARTIFACT-$VERSION.tgz
           export description=$(cat $ARTIFACT/Chart.yaml| yq e '.description' - | sed -e s/\"//g) 
+          mkdir git-repos
           echo "desc: $description"
           echo "::set-output name=DESCRIPTION::$description"
           echo "::set-output name=CHART_DIR::$(pwd)"
-          echo "::set-output name=GIT_REPO_DIR::$(mkdir git-repos)"
+          echo "::set-output name=GIT_REPO_DIR::git-repos"
           ls -la $PWD
         env: 
           ARTIFACT: ${{needs.build.outputs.ARTIFACT}}
@@ -111,6 +112,8 @@ jobs:
         id: checkout-helm-repo
         run: |
           cd $GIT_REPO_DIR/
+          pwd 
+          ls -la 
           git clone https://github.com/${GITHUB_REPOSITORY_OWNER}/${HELM_CHARTS_GIT_REPO}
           cd ${HELM_CHARTS_GIT_REPO}
           git config user.name "$GITHUB_ACTOR - RELEASE BUILD"
@@ -118,10 +121,13 @@ jobs:
           git checkout gh-pages
           
           cd $CHART_DIR
-          export CHAR_DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY_OWNER}/helm-charts/releases/download/${ARTIFACT}-${VERSION}"
-          helm repo index --url $CHAR_DOWNLOAD_URL --merge $GIT_REPO_DIR/index.yaml .
+          export CHART_DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY_OWNER}/${HELM_CHARTS_GIT_REPO}/releases/download/${ARTIFACT}-${VERSION}"
+          helm repo index --url $CHART_DOWNLOAD_URL --merge $GIT_REPO_DIR/index.yaml .
           cat index.yaml 
         env:
+          ARTIFACT: ${{needs.build.outputs.ARTIFACT}}
+          VERSION: ${{needs.build.outputs.VERSION}}
+          RELEASE_VERSION: ${{needs.build.outputs.RELEASE_VERSION}}
           GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}    
-          GIT_REPO_DIR: helm-charts # ${{ steps.prep-helm-deploy.outputs.GIT_REPO_DIR }}
+          GIT_REPO_DIR: ${{ steps.prep-helm-deploy.outputs.GIT_REPO_DIR }}
           HELM_CHARTS_GIT_REPO: helm-charts   
