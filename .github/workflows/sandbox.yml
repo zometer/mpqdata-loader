@@ -105,15 +105,7 @@ jobs:
       - name: Troubleshoot Release-AIO
         id: Release-AIO-troubleshoot
         run: |
-          ls -l           
+          ls -l
+          helm version 
         env:
           GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}          
-      - name: Publish Helm chart
-        uses: stefanprodan/helm-gh-pages@v1.4.1
-        with:
-          token: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}
-          charts_dir: ${{needs.build.outputs.ARTIFACT}}
-          charts_url: https://zometer.github.io/helm-charts
-          owner: ${{ env.GITHUB_REPOSITORY_OWNER }}
-          repository: helm-charts
-          branch: gh-pages
