@@ -109,8 +109,9 @@ jobs:
       - name: Checkout Helm Chart Repo
         id: checkout-helm-repo
         run: |
-          cd $GIT_REPO_DIR
-          git clone https://github.com/${GITHUB_REPOSITORY_OWNER}/helm-charts
+          cd $GIT_REPO_DIR/
+          git clone https://github.com/${GITHUB_REPOSITORY_OWNER}/${HELM_CHARTS_GIT_REPO}
+          cd ${HELM_CHARTS_GIT_REPO}
           git config user.name "$GITHUB_ACTOR - RELEASE BUILD"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"      
           git checkout gh-pages
@@ -120,4 +121,5 @@ jobs:
           helm repo index --url $CHAR_DOWNLOAD_URL --merge $GIT_REPO_DIR/index.yaml .
           cat index.yaml 
         env:
-          GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}          
+          GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}    
+          HELM_CHARTS_GIT_REPO: helm-charts      
