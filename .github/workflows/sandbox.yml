@@ -95,7 +95,7 @@ jobs:
         run: | 
           ls -l ./ 
           tar zxvf $ARTIFACT-$VERSION.tgz
-          export description=$(cat $ARTIFACT/Chart.yaml| yq '.description' | sed -e s/\"//g) 
+          export description=$(cat $ARTIFACT/Chart.yaml| yq e '.description' - | sed -e s/\"//g) 
           echo "desc: $description"
           echo "::set-output name=DESCRIPTION::$description"
         env: 
