@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       GROUP: ${{ steps.releaseVars.outputs.GROUP }}
-      ARTIFACT: ${{ steps.releaseVars.outputs.ARTFACT }}
+      ARTIFACT: ${{ steps.releaseVars.outputs.ARTIFACT }}
       VERSION: ${{ steps.releaseVars.outputs.VERSION }}
       RELEASE_VERSION: ${{ steps.releaseVars.outputs.RELEASE_VERSION }}
     steps:
@@ -82,7 +82,7 @@ jobs:
           RELEASE_VERSION: ${{needs.build.outputs.RELEASE_VERSION}}
       - name: Build Dir
         run: | 
-          ls -l ./ ./build/ ./build/libs/ ./build/helm/charts/
+          ls -l ./ 
         env: 
           ARTIFACT: ${{needs.build.outputs.ARTIFACT}}
           VERSION: ${{needs.build.outputs.VERSION}}
