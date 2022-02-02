@@ -92,6 +92,7 @@ jobs:
       - name: Build Dir
         run: | 
           ls -l ./ 
+          yq --help
         env: 
           ARTIFACT: ${{needs.build.outputs.ARTIFACT}}
           VERSION: ${{needs.build.outputs.VERSION}}
@@ -108,8 +109,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}
         with:
-          tag_name: ${{ env.artifact }}-${{env.version}}
-          asset_files: './build/helm/charts/*.tgz'
+          tag_name: ${{ env.ARTIFACT }}-${{env.VERSION}}
+          asset_files: './*.tgz'
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.2.1
         with: 
