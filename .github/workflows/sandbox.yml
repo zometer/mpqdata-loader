@@ -69,27 +69,6 @@ jobs:
         `grep "=" build/gradle-release.properties | sed s/^/"export "/g`
         env
         docker push $GITHUB_REPOSITORY_OWNER/$artifact:$version
-    - name: Troubleshoot Release-AIO
-      id: Release-AIO-troubleshoot
-      run: |
-        ls -l 
-      env:
-        GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}
-    - name: Create Release With Asset
-      id: Release-AIO
-      uses: Hs1r1us/Release-AIO@v1.0
-      env:
-        GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}
-      with:
-        tag_name: ${{ env.artifact }}-${{env.version}}
-        asset_files: './build/helm/charts/*.tgz'
-    - name: Run chart-releaser
-      uses: helm/chart-releaser-action@v1.2.1
-      with: 
-        charts_dir: "build/helm/charts/"
-        charts_repo_url: "https://zometer.github.io/helm-charts"
-      env:
-        CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"    
   deploy: 
     runs-on: ubuntu-latest
     needs: build 
@@ -107,5 +86,24 @@ jobs:
           ARTIFACT: ${{needs.build.outputs.ARTIFACT}}
           VERSION: ${{needs.build.outputs.VERSION}}
           RELEASE_VERSION: ${{needs.build.outputs.RELEASE_VERSION}}
-        
-    
+      - name: Troubleshoot Release-AIO
+        id: Release-AIO-troubleshoot
+        run: |
+          ls -l 
+        env:
+          GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}
+      - name: Create Release With Asset
+        id: Release-AIO
+        uses: Hs1r1us/Release-AIO@v1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}
+        with:
+          tag_name: ${{ env.artifact }}-${{env.version}}
+          asset_files: './build/helm/charts/*.tgz'
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.2.1
+        with: 
+          charts_dir: "build/helm/charts/"
+          charts_repo_url: "https://zometer.github.io/helm-charts"
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"    
