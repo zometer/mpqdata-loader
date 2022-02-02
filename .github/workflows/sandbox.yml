@@ -17,15 +17,10 @@ on:
         required: false
         default: ''
         type: string
-      helmChartRepoOwner: 
-        description: 'Helm Chart Repository Owner'
-        required: true
-        default: "${{ env.GITHUB_REPOSITORY_OWNER }}"
-        type: string
       helmChartRepo: 
         description: 'Helm Chart Repository'
         required: true
-        default: 'helm-charts'
+        default: 'zometer/helm-charts'
         type: string
       helmChartRepoBranch: 
         description: 'Helm chart index branch'
@@ -64,110 +59,19 @@ jobs:
         echo "::set-output name=VERSION::$version"
     - name: Examine Build directory
       run: |
-        mkdir -p build/ && cp gradle.properties build/gradle-release.properties
-        env
         ls -l build/libs build/helm/charts
-    - name: Upload Helm Chart Artifact
-      uses: actions/upload-artifact@v2.3.1
-      with:
-        name: helm-chart
-        path: build/helm/charts/*.tgz
-    - name: Build Docker Image
-      run: |
-        `grep "=" build/gradle-release.properties | sed s/^/"export "/g`
-        echo "${{ env.GITHUB_REPOSITORY_OWNER }}/$artifact:$version"
-        env
-        docker build . --file Dockerfile --tag $GITHUB_REPOSITORY_OWNER/$artifact:$version
     - name: Log in to Docker Hub
       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-    - name: Push image to Docker Hub
-      run: |
-        `grep "=" build/gradle-release.properties | sed s/^/"export "/g`
-        env
-        docker push $GITHUB_REPOSITORY_OWNER/$artifact:$version
-  deploy-helm-chart:
-    name: Deploy Helm Chart
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy Init
-        run: env
-        env:
-          ARTIFACT: ${{needs.build.outputs.ARTIFACT}}
-          VERSION: ${{needs.build.outputs.VERSION}}
-          RELEASE_VERSION: ${{needs.build.outputs.RELEASE_VERSION}}
-      - name: Download a Build Artifact
-        uses: actions/download-artifact@v2.1.0
-        with:
-          name: helm-chart
-      - name: Prepare Deployment
-        id: prep-helm-deploy
-        run: |
-          ls -l ./
-          tar zxvf $ARTIFACT-$VERSION.tgz
-          export description=$(cat $ARTIFACT/Chart.yaml| yq e '.description' - | sed -e s/\"//g)
-          mkdir git-repos
-          echo "desc: $description"
-          echo "::set-output name=DESCRIPTION::$description"
-          echo "::set-output name=CHART_DIR::$(pwd)"
-          echo "::set-output name=GIT_REPO_DIR::git-repos"
-          ls -la $PWD
-        env:
-          ARTIFACT: ${{needs.build.outputs.ARTIFACT}}
-          VERSION: ${{needs.build.outputs.VERSION}}
-          RELEASE_VERSION: ${{needs.build.outputs.RELEASE_VERSION}}
-      - name: Checkout Helm Chart Repo
-        id: checkout-helm-repo
-        run: |
-          cd $GIT_REPO_DIR/
-          pwd
-          ls -la
-          git clone https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY_OWNER}/${HELM_CHARTS_GIT_REPO}
-          cd ${HELM_CHARTS_GIT_REPO}
-          git config user.name "$GITHUB_ACTOR - RELEASE BUILD"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          git checkout gh-pages
-          ls -la
-        env:
-          GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}
-          CHART_DIR: ${{ steps.prep-helm-deploy.outputs.CHART_DIR }}
-          GIT_REPO_DIR: ${{ steps.prep-helm-deploy.outputs.GIT_REPO_DIR }}
-          HELM_CHARTS_GIT_REPO: helm-charts
-      - name: Generate Updated index.yaml
-        id: update-helm-repo-index
-        run: |
-          cd $CHART_DIR
-          pwd
-          ls -la
-          export CHART_DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY_OWNER}/${HELM_CHARTS_GIT_REPO}/releases/download/${ARTIFACT}-${VERSION}"
-          echo "helm repo index --url $CHART_DOWNLOAD_URL --merge $GIT_REPO_DIR/${HELM_CHARTS_GIT_REPO}/index.yaml ."
-          helm repo index --url $CHART_DOWNLOAD_URL --merge $GIT_REPO_DIR/${HELM_CHARTS_GIT_REPO}/index.yaml .
-          cat index.yaml
-          mv index.yaml $GIT_REPO_DIR/$HELM_CHARTS_GIT_REPO
-        env:
-          ARTIFACT: ${{needs.build.outputs.ARTIFACT}}
-          VERSION: ${{needs.build.outputs.VERSION}}
-          RELEASE_VERSION: ${{needs.build.outputs.RELEASE_VERSION}}
-          GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}
-          CHART_DIR: ${{ steps.prep-helm-deploy.outputs.CHART_DIR }}
-          GIT_REPO_DIR: ${{ steps.prep-helm-deploy.outputs.GIT_REPO_DIR }}
-          HELM_CHARTS_GIT_REPO: helm-charts
-      - name: Push Helm Chart Repo
-        id: push-helm-repo
-        run: |
-          cd $GIT_REPO_DIR/$HELM_CHARTS_GIT_REPO
-          ls -la
-          git add index.yaml
-          git status 
-          git commit -m "Updating index.yaml: ${ARTIFACT}-${VERSION}"
-          git push
-        env:
-          ARTIFACT: ${{needs.build.outputs.ARTIFACT}}
-          VERSION: ${{needs.build.outputs.VERSION}}
-          GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}
-          CHART_DIR: ${{ steps.prep-helm-deploy.outputs.CHART_DIR }}
-          GIT_REPO_DIR: ${{ steps.prep-helm-deploy.outputs.GIT_REPO_DIR }}
-          HELM_CHARTS_GIT_REPO: helm-charts
+    - name: Build and push
+      uses: docker/build-push-action@v2
+      with:
+        push: true
+        tags: ${{ env.GITHUB_REPOSITORY_OWNER }}/${{ steps.releaseVars.outputs.ARTIFACT }}:${{ steps.releaseVars.outputs.VERSION }}
+    - name: Upload Helm Chart Artifact
+      uses: actions/upload-artifact@v2.3.1
+      with:
+        name: helm-chart
+        path: build/helm/charts/*.tgz
