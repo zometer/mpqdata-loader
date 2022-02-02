@@ -80,6 +80,6 @@ jobs:
   deploy-helm-chart:
     uses: zometer/github-actions/.github/workflows/push-helm-chart.yml@main
     with: 
-      helmChartRepo: ${{ inputs.helmChartRepo }} 
-      helmChartRepoBranch: ${{ inputs.helmChartRepoBranch }}
-      artifactName: ${{ inputs.artifactName }}
+      helmChartRepo: ${{ github.event.inputs.helmChartRepo }} 
+      helmChartRepoBranch: ${{ github.event.inputs.helmChartRepoBranch }}
+      artifactName: ${{ github.event.inputs.artifactName }}
