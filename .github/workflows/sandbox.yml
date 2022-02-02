@@ -106,22 +106,13 @@ jobs:
           ARTIFACT: ${{needs.build.outputs.ARTIFACT}}
           VERSION: ${{needs.build.outputs.VERSION}}
           RELEASE_VERSION: ${{needs.build.outputs.RELEASE_VERSION}}
-      - name: Troubleshoot Release-AIO
-        id: Release-AIO-troubleshoot
-        run: |
-          ls -l
-          helm version 
-        env:
-          GITHUB_TOKEN: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}          
-      - name: Set Git User
-        run: |
-          git config user.name "$GITHUB_ACTOR - RELEASE BUILD"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"      
       - name: Checkout Helm Chart Repo
         id: checkout-helm-repo
         run: |
           cd $GIT_REPO_DIR
           git clone https://github.com/${GITHUB_REPOSITORY_OWNER}/helm-charts
+          git config user.name "$GITHUB_ACTOR - RELEASE BUILD"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"      
           git checkout gh-pages
           
           cd $CHART_DIR
