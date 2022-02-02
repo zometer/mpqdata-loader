@@ -30,7 +30,6 @@ on:
         
 jobs:
   build:
-
     runs-on: ubuntu-latest
     outputs:
       GROUP: ${{ steps.releaseVars.outputs.GROUP }}
@@ -44,7 +43,9 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
     - name: Set Git User
-      run: git config -l 
+      run: |
+          git config user.name "$GITHUB_ACTOR - RELEASE BUILD"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
     - name: Build with Gradle
       uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
       with:
@@ -76,3 +77,9 @@ jobs:
       with:
         name: helm-chart
         path: build/helm/charts/*.tgz
+  deploy-helm-chart:
+    uses: zometer/github-actions/deploy/push-helm-chart.yml@main
+    with: 
+      helmChartRepo: ${{ inputs.helmChartRepo }} 
+      helmChartRepoBranch: ${{ inputs.helmChartRepoBranch }}
+      artifactName: ${{ inputs.artifactName }}
