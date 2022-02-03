@@ -9,17 +9,30 @@ name: Sandbox
 
 on:
   workflow_dispatch:
-    inputs: 
-      gradleArgs: 
-        description: 'Additional Gradle parameters'     
+    inputs:
+      gradleArgs:
+        description: 'Additional Gradle parameters'
         required: false
-        default: '' 
-        type: text
+        default: ''
+        type: string
+      helmChartRepo: 
+        description: 'Helm Chart Repository'
+        required: true
+        default: 'zometer/helm-charts'
+        type: string
+      helmChartRepoBranch: 
+        description: 'Helm chart index branch'
+        required: true
+        default: 'gh-pages'
+        type: string
+        
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
+    outputs:
+      GROUP: ${{ steps.releaseVars.outputs.GROUP }}
+      ARTIFACT: ${{ steps.releaseVars.outputs.ARTIFACT }}
+      VERSION: ${{ steps.releaseVars.outputs.VERSION }}
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 17
@@ -27,48 +40,50 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-    - name: Get Build and Release Version
-      run: | 
-        `grep "=" gradle.properties | sed s/^/"export "/g`
-        export RELEASE_VERSION=`echo $version | sed -e s/-SNAPSHOT//`
-        env
-        git config user.name "$GITHUB_ACTOR - RELEASE BUILD"
-        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+    - name: Set Git User
+      run: |
+          git config user.name "$GITHUB_ACTOR - RELEASE BUILD"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
     - name: Build with Gradle
       uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
       with:
         arguments: build -Prelease.useAutomaticVersion=true ${{ github.event.inputs.gradleArgs }}
-    - name: Examine Build directory
-      run: | 
-        mkdir -p build/ && cp gradle.properties build/gradle-release.properties
-        env
-        ls -l build/libs build/helm/charts
-    - name: "Upload Artifact: Helm Chart"
-      uses: actions/upload-artifact@v2
-      with:
-        name: helm-chart
-        path: builds/lib/helm/*.tgz        
-    - name: Build Docker Image 
+    - name: Get Build and Release Version
+      id: releaseVars
       run: |
-        `grep "=" build/gradle-release.properties | sed s/^/"export "/g`
-        echo "${{ env.GITHUB_REPOSITORY_OWNER }}/$artifact:$version"
+        `cat build/resources/main/META-INF/build-info.properties | sed -e s/build./export\ /g`
         env
-        docker build . --file Dockerfile --tag $GITHUB_REPOSITORY_OWNER/$artifact:$version
+        echo "::set-output name=GROUP::$group"
+        echo "::set-output name=ARTIFACT::$artifact"
+        echo "::set-output name=VERSION::$version"
+    - name: Examine Build directory
+      run: |
+        ls -l build/libs build/helm/charts
     - name: Log in to Docker Hub
       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-    - name: Push image to Docker Hub 
-      run: |
-        `grep "=" build/gradle-release.properties | sed s/^/"export "/g`
-        env
-        docker push $GITHUB_REPOSITORY_OWNER/$artifact:$version
-    - name: Run chart-releaser
-      uses: helm/chart-releaser-action@v1.2.1
-      with: 
-        charts_dir: "build/helm/charts/"
-        charts_repo_url: "https://zometer.github.io/helm-charts"
-      env:
-        CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"    
-        
+    - name: Build and push
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        push: true
+        tags: ${{ github.repository_owner }}/${{ steps.releaseVars.outputs.ARTIFACT }}:${{ steps.releaseVars.outputs.VERSION }}
+    - name: Upload Helm Chart Artifact
+      uses: actions/upload-artifact@v2.3.1
+      with:
+        name: helm-chart
+        path: build/helm/charts/*.tgz
+
+  deploy-helm-chart:
+    needs: build
+    uses: zometer/github-actions/.github/workflows/push-helm-chart.yml@main
+    with: 
+      helmChartRepo: ${{ github.event.inputs.helmChartRepo }} 
+      helmChartRepoBranch: ${{ github.event.inputs.helmChartRepoBranch }}
+      artifactName: helm-chart
+      chartName: ${{ needs.build.outputs.ARTIFACT }}
+      chartVersion: ${{ needs.build.outputs.VERSION }}      
+    secrets: 
+      githubToken: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}
