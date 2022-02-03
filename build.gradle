@@ -86,6 +86,7 @@ release {
 	git {
 		requireBranch = 'main'
 	}
+	tagTemplate = 'v${version}'
 }
 
 
