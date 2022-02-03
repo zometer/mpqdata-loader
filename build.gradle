@@ -95,6 +95,6 @@ tasks.register('copyReleaseProperties', Copy) {
 	into "$buildDir"
 	rename "gradle.properties", "gradle-release.properties"
 }
-tasks.afterReleaseBuild.dependsOn copyReleaseProperties
+tasks.afterReleaseBuild.dependsOn copyReleaseProperties, publish
 
 
