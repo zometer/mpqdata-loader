@@ -30,6 +30,8 @@ $ java \
 
 ### Docker
 
+Images are hosted at https://hub.docker.com/r/zometer/mpqdata-loader. 
+
 ````bash
 # Run the application.
 $ docker run -it \
@@ -37,10 +39,12 @@ $ docker run -it \
     -e SPRING_DATASOURCE_URL=$DB_URL \
     -e SPRING_DATAUSER_USERNAME=$DB_USERNAME \
     -e SPRING_DATAUSER_PASSWORD=$DB_PASSWORD \
-    mpqdata-loader:latest
+    zometer/mpqdata-loader:latest
 ````
 
 ### Helm / Kubernetes
+
+Helm charts are hosted at https://zometer.github.io/helm-charts. 
 
 ```bash
 # Add the helm repository
