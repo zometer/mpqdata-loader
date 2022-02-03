@@ -84,7 +84,7 @@ jobs:
       helmChartRepo: ${{ github.event.inputs.helmChartRepo }} 
       helmChartRepoBranch: ${{ github.event.inputs.helmChartRepoBranch }}
       artifactName: helm-chart
-      chartName: ${{ steps.releaseVars.outputs.ARTIFACT }}
-      chartVersion: ${{ steps.releaseVars.outputs.VERSION }}      
+      chartName: ${{ needs.build.outputs.ARTIFACT }}
+      chartVersion: ${{ needs.build.outputs.VERSION }}      
     secrets: 
       githubToken: ${{ secrets.HELM_CHARTS_REPO_TOKEN }}
