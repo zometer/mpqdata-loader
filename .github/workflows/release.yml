@@ -43,7 +43,9 @@ jobs:
     - name: Build with Gradle
       uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
       with:
-        arguments: release -Prelease.useAutomaticVersion=true ${{ github.event.inputs.gradleArgs }}
+        arguments: release publish -Prelease.useAutomaticVersion=true ${{ github.event.inputs.gradleArgs }}
+      env: 
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Get Build and Release Version
       id: releaseVars
       run: |
