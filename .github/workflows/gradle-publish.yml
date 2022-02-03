@@ -8,8 +8,13 @@
 name: Gradle Publish Jar
 
 on:
-  release:
-    types: [created]
+  workflow_dispatch:
+    inputs:
+      gradleArgs:
+        description: 'Additional Gradle parameters'
+        required: false
+        default: ''
+        type: string
 
 jobs:
   build:
@@ -32,14 +37,5 @@ jobs:
     - name: Build with Gradle
       uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
       with:
-        arguments: build
+        arguments: build publish ${{github.event.inputs.gradleArgs}}
 
-    # The USERNAME and TOKEN need to correspond to the credentials environment variables used in
-    # the publishing section of your build.gradle
-    - name: Publish to GitHub Packages
-      uses: gradle/gradle-build-action@4137be6a8bf7d7133955359dbd952c0ca73b1021
-      with:
-        arguments: publish
-      env:
-        USERNAME: ${{ github.actor }}
-        TOKEN: ${{ secrets.GITHUB_TOKEN }}
