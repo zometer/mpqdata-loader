@@ -22,7 +22,7 @@ import com.mpqdata.app.data.mpqdataloader.model.service.SarUrlLookupService;
 
 import lombok.Setter;
 
-@Order(0)
+@Order(1)
 @Profile("download-archive")
 @Component
 public class DownloadAndExpandSarArchiveCommandLineRunner implements CommandLineRunner {
