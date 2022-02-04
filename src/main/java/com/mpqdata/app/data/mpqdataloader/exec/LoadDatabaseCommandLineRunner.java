@@ -19,7 +19,7 @@ import com.mpqdata.app.data.mpqdataloader.model.service.MpqCharcterFileSystemSer
 
 import lombok.Setter;
 
-@Order(1)
+@Order(2)
 @Profile("load-database")
 @Component
 public class LoadDatabaseCommandLineRunner implements CommandLineRunner {
