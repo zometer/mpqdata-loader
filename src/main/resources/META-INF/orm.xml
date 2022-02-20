@@ -30,5 +30,20 @@
 			where 1=1
 		</query>
 	</named-native-query>
+	<named-native-query name="CharacterCover.insertForNewCharacters" >
+		<query>
+			insert into mpq_data.character_cover (
+				mpq_character_id
+			)
+			select mcr.mpq_character_id
+			from mpq_data.mpq_character mcr
+					left outer join mpq_data.character_cover cvr
+						on cvr.mpq_character_id = mcr.mpq_character_id
+			where 1=1
+			and   cvr.mpq_character_id is null
+			order by mcr.release_date,
+					mpq_character_id
+		</query>
+	</named-native-query>
 
 </entity-mappings>
