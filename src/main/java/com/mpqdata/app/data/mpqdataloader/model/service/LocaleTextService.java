@@ -108,5 +108,4 @@ public class LocaleTextService {
 		throw new MpqDataLoaderException("Locale Key [" + key +"] not found in locale files.");
 	}
 
-
 }
