@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import com.mpqdata.app.data.mpqdataloader.model.service.CharacterCoverService;
 import com.mpqdata.app.data.mpqdataloader.model.service.LocaleTextService;
 import com.mpqdata.app.data.mpqdataloader.model.service.MpqCharcterFileSystemService;
 
@@ -41,6 +42,10 @@ public class LoadDatabaseCommandLineRunner implements CommandLineRunner {
 	@Setter
 	private LocaleTextService localeTextService;
 
+	@Autowired
+	@Setter
+	private CharacterCoverService characterCoverService;
+
 	@Override
 	public void run(String... args) throws Exception {
 		logger.info("Database Load Process start");
@@ -52,6 +57,9 @@ public class LoadDatabaseCommandLineRunner implements CommandLineRunner {
 
 		localeTextService.setLanguages(languages);
 		localeTextService.loadLocaleText(localeDir);
+
+		characterCoverService.insertForNewCharacters();
+		characterCoverService.loadCharacterCovers(dataDir);
 
 		logger.info("Database Load Process complete");
 	}
